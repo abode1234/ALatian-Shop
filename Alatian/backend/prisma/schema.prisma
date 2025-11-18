@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String       @unique
+  password      String
+  googleId      String?      @unique
+  role          Role         @default(USER)
+  emailVerified DateTime?
+  image         String?
+  refreshToken  String?      @db.Text
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  cartItems     CartItem[]
+  orders        Order[]
+  reviews       Review[]
+  wishlistItems WishlistItem[]
+  builds        Build[]
+}
+
+model Product {
+  id               String       @id @default(cuid())
+  name             String
+  description      String       @db.Text
+  price            Decimal      @db.Decimal(10, 2)
+  brand            String
+  images           String[]
+  category         Category
+  stock            Int
+  specifications   Json
+  powerConsumption Int?
+  avgRating        Float        @default(0)
+  totalReviews     Int          @default(0)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+  reviews          Review[]
+  wishlistItems    WishlistItem[]
+  buildComponents  BuildComponent[]
+
+  @@index([name, brand, category])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  quantity  Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNumber     String        @unique
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  status          OrderStatus   @default(PENDING)
+  shippingAddress Json
+  statusHistory   Json[]
+  trackingNumber  String?
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String
+  items           OrderItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  quantity  Int
+  price     Decimal  @db.Decimal(10, 2)
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId   String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?  @db.Text
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+}
+
+model Build {
+  id          String           @id @default(cuid())
+  name        String
+  description String?          @db.Text
+  isPublic    Boolean          @default(false)
+  isTemplate  Boolean          @default(false)
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  components  BuildComponent[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model BuildComponent {
+  id        String   @id @default(cuid())
+  category  Category
+  build     Build    @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  buildId   String
+  product   Product  @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
+
+  @@unique([buildId, category])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum Category {
+  LAPTOP
+  DESKTOP
+  CPU
+  GPU
+  RAM
+  STORAGE
+  MOTHERBOARD
+  PSU
+  CASE
+  COOLING
+  ACCESSORY
+}
