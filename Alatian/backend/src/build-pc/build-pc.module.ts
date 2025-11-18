@@ -5,6 +5,7 @@ import { BuildPCService } from './build-pc.service';
 @Module({
   controllers: [BuildPCController],
   providers: [BuildPCService],
+  exports: [BuildPCService],
 })
 export class BuildPCModule {}
 
