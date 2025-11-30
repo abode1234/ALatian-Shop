@@ -1,0 +1,63 @@
+[
+  {
+    "id": "1",
+    "name": "كروت شاشة",
+    "icon": "🎮",
+    "slug": "graphics-cards"
+  },
+  {
+    "id": "2",
+    "name": "معالجات",
+    "icon": "⚡",
+    "slug": "processors"
+  },
+  {
+    "id": "3",
+    "name": "لوحات أم",
+    "icon": "🔌",
+    "slug": "motherboards"
+  },
+  {
+    "id": "4",
+    "name": "RAM",
+    "icon": "💾",
+    "slug": "ram"
+  },
+  {
+    "id": "5",
+    "name": "مزودات طاقة",
+    "icon": "🔋",
+    "slug": "power-supplies"
+  },
+  {
+    "id": "6",
+    "name": "كيسات",
+    "icon": "📦",
+    "slug": "cases"
+  },
+  {
+    "id": "7",
+    "name": "مبردات",
+    "icon": "❄️",
+    "slug": "coolers"
+  },
+  {
+    "id": "8",
+    "name": "شاشات",
+    "icon": "🖥️",
+    "slug": "monitors"
+  },
+  {
+    "id": "9",
+    "name": "اكسسوارات",
+    "icon": "⌨️",
+    "slug": "accessories"
+  },
+  {
+    "id": "10",
+    "name": "تجميعات جاهزة",
+    "icon": "🖥️",
+    "slug": "pre-built"
+  }
+]
+
