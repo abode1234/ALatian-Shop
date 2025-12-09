@@ -31,6 +31,28 @@
   --radius: 0.75rem;
 }
 
+.light {
+  --background: oklch(0.98 0.005 270);
+  --foreground: oklch(0.05 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.05 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.05 0 0);
+  --primary: oklch(0.55 0.18 285);
+  --primary-foreground: oklch(0.98 0.005 270);
+  --secondary: oklch(0.95 0.01 270);
+  --secondary-foreground: oklch(0.05 0 0);
+  --muted: oklch(0.95 0.01 270);
+  --muted-foreground: oklch(0.3 0 0);
+  --accent: oklch(0.95 0.01 270);
+  --accent-foreground: oklch(0.05 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+  --border: oklch(0.9 0.005 270);
+  --input: oklch(0.9 0.005 270);
+  --ring: oklch(0.55 0.18 285);
+}
+
 .dark {
   --background: oklch(0.15 0.01 270);
   --foreground: oklch(0.98 0.005 270);
@@ -54,8 +76,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: var(--font-almarai), var(--font-tajawal), sans-serif;
+  --font-mono: 'Geist Mono', monospace;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -91,6 +113,54 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
+
+  html[dir="rtl"] {
+    direction: rtl;
+  }
+
+  html[dir="ltr"] {
+    direction: ltr;
+  }
+
+  /* Light theme specific styles */
+  .light body {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+  }
+
+  .dark body {
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
+  }
+}
+
+@layer utilities {
+  .glow-button {
+    box-shadow: 0 0 10px rgba(229, 90, 31, 0.3);
+    transition: all 0.3s ease;
+  }
+
+  .glow-button:hover {
+    box-shadow: 0 0 20px rgba(229, 90, 31, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .hover-scale {
+    transition: transform 0.3s ease;
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
+  }
+
+  .text-gradient {
+    background: linear-gradient(90deg, #e55a1f, #ffa500);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark-theme-bg {
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 100%);
   }
 }
