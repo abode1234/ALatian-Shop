@@ -26,9 +26,14 @@ export interface ProductFilter {
 
 class ApiClient {
   private baseUrl: string;
+  private accessToken: string | null = null;
 
   constructor() {
     this.baseUrl = API_URL;
+    // Load token from localStorage on client side
+    if (typeof window !== 'undefined') {
+      this.accessToken = localStorage.getItem('accessToken');
+    }
   }
 
   private async request<T>(
@@ -37,22 +42,45 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options?.headers as Record<string, string>,
+    };
+
+    // Add Authorization header if token exists
+    if (this.accessToken) {
+      headers['Authorization'] = `Bearer ${this.accessToken}`;
+    }
+
     const config: RequestInit = {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers,
       credentials: 'include', // for cookies
     };
 
     const response = await fetch(url, config);
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.statusText}`);
+      const errorData = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(errorData.message || `API Error: ${response.statusText}`);
     }
 
     return response.json();
+  }
+
+  setAccessToken(token: string) {
+    this.accessToken = token;
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('accessToken', token);
+    }
+  }
+
+  clearTokens() {
+    this.accessToken = null;
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+    }
   }
 
   // Products
@@ -121,23 +149,43 @@ class ApiClient {
 
   // Auth
   async register(email: string, password: string, name?: string) {
-    return this.request('/auth/register', {
+    const response: any = await this.request('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, name }),
     });
+
+    if (response.accessToken) {
+      this.setAccessToken(response.accessToken);
+      if (typeof window !== 'undefined' && response.refreshToken) {
+        localStorage.setItem('refreshToken', response.refreshToken);
+      }
+    }
+
+    return response;
   }
 
   async login(email: string, password: string) {
-    return this.request('/auth/login', {
+    const response: any = await this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
+
+    if (response.accessToken) {
+      this.setAccessToken(response.accessToken);
+      if (typeof window !== 'undefined' && response.refreshToken) {
+        localStorage.setItem('refreshToken', response.refreshToken);
+      }
+    }
+
+    return response;
   }
 
   async logout() {
-    return this.request('/auth/logout', {
+    const response = await this.request('/auth/logout', {
       method: 'POST',
     });
+    this.clearTokens();
+    return response;
   }
 
   async getProfile() {

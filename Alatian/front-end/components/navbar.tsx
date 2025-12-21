@@ -1,13 +1,36 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
-import { Search, ShoppingCart, User, Menu, X, Home, Package, Headphones, Cpu } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, ShoppingCart, User, Menu, X, Home, Package, Headphones, Cpu, LogOut } from 'lucide-react';
 import ThemeToggle from './theme-toggle';
+import { api } from '@/lib/api';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  // Check if user is logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          const profile = await api.getProfile();
+          setIsLoggedIn(true);
+          setUserName(profile.name || 'المستخدم');
+        }
+      } catch (err) {
+        setIsLoggedIn(false);
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+      }
+    };
+    checkAuth();
+  }, []);
 
   const categories = [
     { name: 'المعالجات', slug: 'CPU' },
@@ -25,6 +48,22 @@ export default function Navbar() {
     e.preventDefault();
     if (searchQuery.trim()) {
       window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await api.logout();
+      setIsLoggedIn(false);
+      setUserName('');
+      window.location.href = '/';
+    } catch (err) {
+      console.error('Logout error:', err);
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      setIsLoggedIn(false);
+      setUserName('');
+      window.location.href = '/';
     }
   };
 
@@ -74,13 +113,58 @@ export default function Navbar() {
                 0
               </span>
             </Link>
-            <Link
-              href="/account"
-              className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors glow-button"
-            >
-              <User className="h-5 w-5" />
-              <span>تسجيل الدخول</span>
-            </Link>
+
+            {/* User Profile or Login Button */}
+            {isLoggedIn ? (
+              <div className="relative group">
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center space-x-2 space-x-reverse p-2 hover:bg-accent rounded-lg transition-colors"
+                >
+                  <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                    <User className="h-6 w-6" />
+                  </div>
+                </button>
+
+                {/* Profile Dropdown Menu */}
+                <div className="absolute top-full left-0 mt-2 w-56 bg-background border border-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <div className="p-4 border-b border-border">
+                    <p className="font-semibold text-foreground">{userName}</p>
+                  </div>
+                  <div className="p-2">
+                    <Link
+                      href="/account"
+                      className="flex items-center space-x-2 space-x-reverse px-4 py-2 hover:bg-accent rounded-lg transition-colors"
+                    >
+                      <User className="h-5 w-5" />
+                      <span>حسابي</span>
+                    </Link>
+                    <Link
+                      href="/orders"
+                      className="flex items-center space-x-2 space-x-reverse px-4 py-2 hover:bg-accent rounded-lg transition-colors"
+                    >
+                      <Package className="h-5 w-5" />
+                      <span>طلباتي</span>
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center space-x-2 space-x-reverse px-4 py-2 hover:bg-accent rounded-lg transition-colors text-red-500"
+                    >
+                      <LogOut className="h-5 w-5" />
+                      <span>تسجيل الخروج</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Link
+                href="/account"
+                className="flex items-center space-x-2 space-x-reverse px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors glow-button"
+              >
+                <User className="h-5 w-5" />
+                <span>تسجيل الدخول</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -231,14 +315,49 @@ export default function Navbar() {
                 <ShoppingCart className="h-5 w-5" />
                 <span>سلة التسوق</span>
               </Link>
-              <Link
-                href="/account"
-                className="flex items-center justify-center space-x-2 space-x-reverse px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <User className="h-5 w-5" />
-                <span>تسجيل الدخول</span>
-              </Link>
+
+              {isLoggedIn ? (
+                <>
+                  <div className="px-4 py-2 border-b border-border">
+                    <p className="font-semibold text-foreground">{userName}</p>
+                  </div>
+                  <Link
+                    href="/account"
+                    className="flex items-center space-x-2 space-x-reverse px-4 py-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <User className="h-5 w-5" />
+                    <span>حسابي</span>
+                  </Link>
+                  <Link
+                    href="/orders"
+                    className="flex items-center space-x-2 space-x-reverse px-4 py-3 hover:bg-accent rounded-lg transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    <Package className="h-5 w-5" />
+                    <span>طلباتي</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full flex items-center space-x-2 space-x-reverse px-4 py-3 hover:bg-accent rounded-lg transition-colors text-red-500"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    <span>تسجيل الخروج</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href="/account"
+                  className="flex items-center justify-center space-x-2 space-x-reverse px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User className="h-5 w-5" />
+                  <span>تسجيل الدخول</span>
+                </Link>
+              )}
             </div>
           </div>
         </div>

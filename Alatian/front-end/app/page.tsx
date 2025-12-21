@@ -36,31 +36,65 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative h-[500px] md:h-[600px] bg-gradient-to-br from-primary-dark via-secondary to-black overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
-        <div className="container mx-auto px-4 h-full flex items-center relative z-10">
-          <div className="max-w-2xl animate-fade-in">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6 text-white">
-              اجمع جهازك المثالي
-              <span className="block text-gradient mt-2">بأفضل الأسعار</span>
-            </h1>
-            <p className="text-xl text-gray-300 mb-8">
-              تشكيلة واسعة من قطع الكمبيوتر والألعاب بأعلى جودة وأفضل الأسعار في العراق
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link
-                href="/products"
-                className="px-8 py-4 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors glow-button text-center font-semibold"
-              >
-                تصفح المنتجات
-              </Link>
-              <Link
-                href="/products?category=DESKTOP"
-                className="px-8 py-4 bg-white text-primary rounded-lg hover:bg-gray-100 transition-colors text-center font-semibold"
-              >
-                تجميعات جاهزة
-              </Link>
+      {/* Promotional Banners */}
+      <section className="py-6 md:py-12 bg-background">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+            {/* Large Banner - Right Side */}
+            <div className="lg:col-span-2 lg:order-2">
+              <div className="relative h-[300px] sm:h-[400px] lg:h-full lg:min-h-[500px] rounded-xl overflow-hidden group cursor-pointer">
+                <img
+                  src="https://placehold.co/800x500/1a1a1a/orange?text=Banner+1"
+                  alt="تدور تجميعات احترافية اقساط"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                <div className="absolute bottom-0 right-0 p-4 sm:p-6 md:p-8 text-white w-full">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold mb-2 md:mb-4">
+                    تدور تجميعات احترافية أقساط؟
+                  </h3>
+                  <p className="text-sm sm:text-base md:text-lg lg:text-xl mb-2">متوفرة في امازون بالتقسيط تبي وثمارا</p>
+                  <div className="flex items-center gap-2 md:gap-4 mt-2 md:mt-4">
+                    <div className="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded">
+                      <span className="text-black font-bold text-sm md:text-base">Amazon</span>
+                    </div>
+                    <div className="bg-orange-500 px-3 py-1.5 md:px-4 md:py-2 rounded">
+                      <span className="text-white font-bold text-sm md:text-base">TTX</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Two Small Banners - Left Side Stacked */}
+            <div className="lg:col-span-1 lg:order-1 flex flex-col gap-4 md:gap-6">
+              {/* Top Small Banner */}
+              <div className="relative h-[200px] sm:h-[220px] lg:h-[247px] rounded-xl overflow-hidden group cursor-pointer">
+                <img
+                  src="https://placehold.co/400x247/1a1a1a/orange?text=Banner+2"
+                  alt="التجميعات الاحترافية"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                <div className="absolute bottom-0 right-0 p-4 md:p-6 text-white w-full">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 md:mb-2">التجميعات الاحترافية</h3>
+                  <p className="text-xs sm:text-sm">تدور عليه راح تلقاه عندنا بأفضل سعر</p>
+                </div>
+              </div>
+
+              {/* Bottom Small Banner */}
+              <div className="relative h-[200px] sm:h-[220px] lg:h-[247px] rounded-xl overflow-hidden group cursor-pointer">
+                <img
+                  src="https://placehold.co/400x247/1a1a1a/orange?text=Banner+3"
+                  alt="اي كرت شاشة"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+                <div className="absolute bottom-0 right-0 p-4 md:p-6 text-white w-full">
+                  <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 md:mb-2">اي كرت شاشة</h3>
+                  <p className="text-xs sm:text-sm">تدور عليه راح تلقاه عندنا بأفضل سعر</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

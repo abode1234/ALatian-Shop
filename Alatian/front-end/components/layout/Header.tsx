@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Search, Home, Gamepad2, Package, Headphones, Languages, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,9 +13,27 @@ import {
   NavigationMenuList,
   NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu'
+import { api } from '@/lib/api'
 
 export default function Header() {
   const [isAnnouncementVisible, setIsAnnouncementVisible] = useState(true)
+  const [user, setUser] = useState<{ name: string; email: string } | null>(null)
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null
+        if (token) {
+          const profile = await api.getProfile()
+          setUser(profile as { name: string; email: string })
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err)
+      }
+    }
+
+    checkAuth()
+  }, [])
 
   return (
     <header className="sticky top-0 z-50">
@@ -74,15 +92,27 @@ export default function Header() {
               >
                 <Languages className="h-5 w-5" />
               </Button>
-              <Button
-                asChild
-                className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6"
-              >
-                <Link href="/login" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  تسجيل الدخول
-                </Link>
-              </Button>
+              {user ? (
+                <Button
+                  asChild
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6"
+                >
+                  <Link href="/account" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    {user.name}
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  asChild
+                  className="bg-orange-500 hover:bg-orange-600 text-white font-semibold px-6"
+                >
+                  <Link href="/account" className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    تسجيل الدخول
+                  </Link>
+                </Button>
+              )}
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import productsData from "@/data/products.json";
-import { Heart, ShoppingCart } from "lucide-react";
+import { Heart, ShoppingCart, Star } from "lucide-react";
 import Link from "next/link";
+import { api } from "@/lib/api";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -9,30 +9,38 @@ interface PageProps {
 
 export default async function ProductPage({ params }: PageProps) {
   const { id } = await params;
-  const product = productsData.find((p) => p.id === id);
+
+  let product;
+  try {
+    product = await api.getProduct(id);
+  } catch (error) {
+    notFound();
+  }
 
   if (!product) {
     notFound();
   }
 
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("ar-IQ", {
+    return new Intl.NumberFormat("ar-SA", {
       style: "decimal",
     }).format(price);
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full min-h-screen bg-black text-white">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Product Image */}
-          <div className="bg-white rounded-lg shadow-md p-4">
-            <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-              <img
-                src={product.image}
-                alt={product.nameAr}
-                className="w-full h-full object-cover"
-              />
+          <div className="bg-gray-900 rounded-lg shadow-md p-4 border border-gray-800">
+            <div className="aspect-square bg-gray-800 rounded-lg overflow-hidden">
+              {product.images && product.images[0] && (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className="w-full h-full object-contain"
+                />
+              )}
             </div>
           </div>
 
@@ -40,78 +48,84 @@ export default async function ProductPage({ params }: PageProps) {
           <div className="space-y-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                {product.isNew && (
-                  <span className="bg-green-500 text-white text-xs px-2 py-1 rounded">
-                    جديد
+                {product.stock === 0 && (
+                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
+                    غير متوفر
                   </span>
                 )}
-                {product.badge && (
-                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded">
-                    {product.badge}
+                {product.stock > 0 && product.stock <= 5 && (
+                  <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                    كمية محدودة
                   </span>
                 )}
               </div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                {product.nameAr}
+              <h1 className="text-3xl font-bold text-white mb-2">
+                {product.name}
               </h1>
-              <p className="text-gray-600 mb-4">{product.specs}</p>
+              <p className="text-gray-400 mb-4">{product.description}</p>
               <div className="flex items-center gap-2 mb-4">
-                <span className="text-sm text-gray-500">الماركة:</span>
+                <span className="text-sm text-gray-400">الماركة:</span>
                 <Link
-                  href={`/brands?brand=${product.brand}`}
-                  className="text-purple-600 hover:text-purple-700 font-semibold"
+                  href={`/products?brand=${product.brand}`}
+                  className="text-orange-400 hover:text-orange-500 font-semibold"
                 >
                   {product.brand}
                 </Link>
               </div>
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center">
+                  <Star className="h-5 w-5 fill-yellow-500 text-yellow-500" />
+                  <span className="text-lg font-semibold mr-2">{product.avgRating.toFixed(1)}</span>
+                </div>
+                <span className="text-gray-400">({product.totalReviews} تقييم)</span>
+              </div>
             </div>
 
             {/* Price */}
-            <div className="border-t border-b border-gray-200 py-6">
+            <div className="border-t border-b border-gray-800 py-6">
               <div className="flex items-center gap-4">
-                <span className="text-3xl font-bold text-purple-700">
-                  {formatPrice(product.price)} د.ع
+                <span className="text-3xl font-bold text-orange-400">
+                  {formatPrice(product.price)} ر.س
                 </span>
-                {product.originalPrice && product.originalPrice > product.price && (
-                  <span className="text-xl text-gray-400 line-through">
-                    {formatPrice(product.originalPrice)} د.ع
-                  </span>
-                )}
               </div>
-              {product.originalPrice && product.originalPrice > product.price && (
-                <p className="text-green-600 font-semibold mt-2">
-                  وفرت {formatPrice(product.originalPrice - product.price)} د.ع
-                </p>
-              )}
+              <p className="text-gray-400 mt-2">
+                الكمية المتوفرة: {product.stock}
+              </p>
             </div>
 
             {/* Actions */}
             <div className="flex gap-4">
-              <Link
-                href="/cart"
-                className="flex-1 bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700 transition flex items-center justify-center gap-2 font-semibold"
+              <button
+                disabled={product.stock === 0}
+                className="flex-1 bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-5 h-5" />
-                أضف إلى السلة
-              </Link>
-              <button className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-200 transition">
+                {product.stock === 0 ? 'غير متوفر' : 'أضف إلى السلة'}
+              </button>
+              <button className="bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition border border-gray-700">
                 <Heart className="w-5 h-5" />
               </button>
             </div>
 
             {/* Description */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-4">المواصفات</h2>
-              <ul className="space-y-2 text-gray-600">
+            <div className="bg-gray-900 rounded-lg p-6 border border-gray-800">
+              <h2 className="text-xl font-bold text-white mb-4">المواصفات</h2>
+              <ul className="space-y-2 text-gray-300">
                 <li>
                   <span className="font-semibold">الفئة:</span> {product.category}
                 </li>
                 <li>
                   <span className="font-semibold">الماركة:</span> {product.brand}
                 </li>
-                <li>
-                  <span className="font-semibold">المواصفات:</span> {product.specs}
-                </li>
+                {product.specifications && Object.keys(product.specifications).length > 0 && (
+                  <>
+                    {Object.entries(product.specifications).map(([key, value]) => (
+                      <li key={key}>
+                        <span className="font-semibold">{key}:</span> {String(value)}
+                      </li>
+                    ))}
+                  </>
+                )}
               </ul>
             </div>
           </div>
